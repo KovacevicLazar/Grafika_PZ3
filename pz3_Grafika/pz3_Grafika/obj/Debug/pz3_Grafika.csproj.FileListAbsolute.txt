@@ -1,0 +1,14 @@
+C:\Users\HP 650 G2\Documents\GitHub\Grafika_PZ3\pz3_Grafika\pz3_Grafika\bin\Debug\pz3_Grafika.exe.config
+C:\Users\HP 650 G2\Documents\GitHub\Grafika_PZ3\pz3_Grafika\pz3_Grafika\bin\Debug\pz3_Grafika.exe
+C:\Users\HP 650 G2\Documents\GitHub\Grafika_PZ3\pz3_Grafika\pz3_Grafika\bin\Debug\pz3_Grafika.pdb
+C:\Users\HP 650 G2\Documents\GitHub\Grafika_PZ3\pz3_Grafika\pz3_Grafika\obj\Debug\pz3_Grafika.csprojAssemblyReference.cache
+C:\Users\HP 650 G2\Documents\GitHub\Grafika_PZ3\pz3_Grafika\pz3_Grafika\obj\Debug\MainWindow.g.cs
+C:\Users\HP 650 G2\Documents\GitHub\Grafika_PZ3\pz3_Grafika\pz3_Grafika\obj\Debug\App.g.cs
+C:\Users\HP 650 G2\Documents\GitHub\Grafika_PZ3\pz3_Grafika\pz3_Grafika\obj\Debug\pz3_Grafika_MarkupCompile.cache
+C:\Users\HP 650 G2\Documents\GitHub\Grafika_PZ3\pz3_Grafika\pz3_Grafika\obj\Debug\pz3_Grafika_MarkupCompile.lref
+C:\Users\HP 650 G2\Documents\GitHub\Grafika_PZ3\pz3_Grafika\pz3_Grafika\obj\Debug\MainWindow.baml
+C:\Users\HP 650 G2\Documents\GitHub\Grafika_PZ3\pz3_Grafika\pz3_Grafika\obj\Debug\pz3_Grafika.g.resources
+C:\Users\HP 650 G2\Documents\GitHub\Grafika_PZ3\pz3_Grafika\pz3_Grafika\obj\Debug\pz3_Grafika.Properties.Resources.resources
+C:\Users\HP 650 G2\Documents\GitHub\Grafika_PZ3\pz3_Grafika\pz3_Grafika\obj\Debug\pz3_Grafika.csproj.GenerateResource.cache
+C:\Users\HP 650 G2\Documents\GitHub\Grafika_PZ3\pz3_Grafika\pz3_Grafika\obj\Debug\pz3_Grafika.exe
+C:\Users\HP 650 G2\Documents\GitHub\Grafika_PZ3\pz3_Grafika\pz3_Grafika\obj\Debug\pz3_Grafika.pdb
