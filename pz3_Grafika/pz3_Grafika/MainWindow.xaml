@@ -10,16 +10,33 @@
         
 
     <Grid>
-        <Viewport3D x:Name="ViewPort">
+        <Viewport3D x:Name="ViewPort" MouseLeftButtonDown="ViewPort_MouseLeftButtonDown"
+                    MouseLeftButtonUp="ViewPort_MouseLeftButtonUp"  MouseMove="ViewPort_MouseMove"
+                    MouseWheel="ViewPort_MouseWheel">
+           
+
             <Viewport3D.Camera>
-                <PerspectiveCamera Position = "600,-200,150" LookDirection = "0,19,-5"
-               FieldOfView = "65" UpDirection = "0,1,0" />
+                <PerspectiveCamera x:Name="CAMERA" Position = "589 -250 850" LookDirection = "0,3.4,-5" FieldOfView = "65"  >
+                <PerspectiveCamera.Transform>
+                        <Transform3DGroup>
+                        <TranslateTransform3D x:Name="translacija" OffsetX="0" OffsetY="0" OffsetZ="0"/>
+                       
+                        </Transform3DGroup>
+                    </PerspectiveCamera.Transform>
+                </PerspectiveCamera>
             </Viewport3D.Camera>
+
+            <ModelVisual3D x:Name="myLight">
+                <ModelVisual3D.Content>
+                    <DirectionalLight x:Name = "dirLightMain"  Direction = "0,2,-10"/>
+                </ModelVisual3D.Content>
+            </ModelVisual3D>
 
             <ModelVisual3D>
                 <ModelVisual3D.Content>
                     <Model3DGroup x:Name="model3dGroup">
-                        <DirectionalLight Color="Yellow" />
+
+                       
 
                         <GeometryModel3D>
                             <GeometryModel3D.Geometry>

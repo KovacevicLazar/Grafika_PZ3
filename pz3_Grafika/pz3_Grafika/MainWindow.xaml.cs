@@ -31,6 +31,11 @@ namespace pz3_Grafika
         public const double maxLatitude = 45.277031;
 
 
+        private System.Windows.Point start = new System.Windows.Point();
+        private System.Windows.Point diffOffset = new System.Windows.Point();
+        private int zoomMax = 80;
+        private int zoomCurent = 20;
+
 
         //point.x, ObjectCnt
         private static Dictionary<System.Windows.Point, int> numberOfEntityOnPoint = new Dictionary<System.Windows.Point, int>();
@@ -43,9 +48,9 @@ namespace pz3_Grafika
             InitializeComponent();
             this.xmlEntities = ParseXml();
 
-            foreach(var node in xmlEntities.Nodes)
+            foreach (var node in xmlEntities.Nodes)
             {
-                if(node.Longitude==0 || node.Latitude == 0 || collectionOfNodesID.ContainsKey(node.Id))
+                if (node.Longitude == 0 || node.Latitude == 0 || collectionOfNodesID.ContainsKey(node.Id))
                 {
                     continue;
                 }
@@ -58,7 +63,7 @@ namespace pz3_Grafika
                 GeometryModel3D geometryModel3D = new GeometryModel3D(meshGeometry3D, diffuseMaterial);
 
                 model3dGroup.Children.Add(geometryModel3D);
-               
+
 
             }
 
@@ -172,12 +177,12 @@ namespace pz3_Grafika
             meshGeometry3D.TriangleIndices.Add(5);
             meshGeometry3D.TriangleIndices.Add(6);
 
-            
+
 
             return meshGeometry3D;
         }
 
-        
+
 
         private static System.Windows.Point CreatePoint(double longitude, double latitude)
         {
@@ -225,7 +230,7 @@ namespace pz3_Grafika
             double longit = 0;
             double latid = 0;
 
-            for (int i=0; i< substations.Count(); i++)
+            for (int i = 0; i < substations.Count(); i++)
             {
                 var item = substations[i];
                 ToLatLon(item.X, item.Y, 34, out latid, out longit);
@@ -362,6 +367,54 @@ namespace pz3_Grafika
 
             longitude = ((delt * (180.0 / Math.PI)) + s) + diflon;
             latitude = ((lat + (1 + e2cuadrada * Math.Pow(Math.Cos(lat), 2) - (3.0 / 2.0) * e2cuadrada * Math.Sin(lat) * Math.Cos(lat) * (tao - lat)) * (tao - lat)) * (180.0 / Math.PI)) + diflat;
+        }
+
+        private void ViewPort_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+
+            ViewPort.CaptureMouse();
+            start = e.GetPosition(this);
+            diffOffset.X = translacija.OffsetX;
+            diffOffset.Y = translacija.OffsetY;
+
+        }
+
+        private void ViewPort_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            ViewPort.ReleaseMouseCapture();
+        }
+
+        private void ViewPort_MouseMove(object sender, MouseEventArgs e)
+        {
+
+            if (ViewPort.IsMouseCaptured)
+            {
+                System.Windows.Point currentPosition = e.GetPosition(this);
+                double offsetX = currentPosition.X - start.X;
+                double offsetY = currentPosition.Y - start.Y;
+             
+                double translateX = -(offsetX)/2; //Usporavam kretanje za duplo
+                double translateY = (offsetY)/2;
+                translacija.OffsetX = diffOffset.X + translateX;
+                translacija.OffsetY = diffOffset.Y + translateY;
+            }
+
+        }
+
+        private void ViewPort_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            Point3D p = new Point3D( CAMERA.Position.X, CAMERA.Position.Y,CAMERA.Position.Z);
+         
+            if (e.Delta > 0 && zoomCurent > -zoomMax)
+            {
+                translacija.OffsetZ -= 10;
+                zoomCurent--;
+            }
+            else if (e.Delta <= 0 && zoomCurent < zoomMax)
+            {  
+                translacija.OffsetZ += 10;
+                zoomCurent++;
+            }
         }
     }
 }
