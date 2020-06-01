@@ -11,6 +11,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Windows.Navigation;
@@ -33,14 +34,14 @@ namespace pz3_Grafika
 
         private System.Windows.Point start = new System.Windows.Point();
         private System.Windows.Point diffOffset = new System.Windows.Point();
-        private int zoomMax = 80;
-        private int zoomCurent = 20;
+        private int zoomMax = 50;
+        private int zoomCurent = 30;
 
 
         //point.x, ObjectCnt
         private static Dictionary<System.Windows.Point, int> numberOfEntityOnPoint = new Dictionary<System.Windows.Point, int>();
 
-        private static Dictionary<long, grafikaPZ3.Model.Point> collectionOfNodesID = new Dictionary<long, grafikaPZ3.Model.Point>();
+        private static Dictionary<long, PowerEntity> collectionOfNodesID = new Dictionary<long, PowerEntity>();
 
         public XmlEntities xmlEntities { get; set; }
         public MainWindow()
@@ -50,17 +51,29 @@ namespace pz3_Grafika
 
             foreach (var node in xmlEntities.Nodes)
             {
-                if (node.Longitude == 0 || node.Latitude == 0 || collectionOfNodesID.ContainsKey(node.Id))
+                if (node.Longitude == 0 || node.Latitude == 0 )
                 {
-                    continue;
+                    continue; 
                 }
-                collectionOfNodesID.Add(node.Id, new grafikaPZ3.Model.Point());
+                //collectionOfNodesID.Add(node.Id, node);
 
                 MeshGeometry3D meshGeometry3D = createCubeMeshGeometry(node.Longitude, node.Latitude, node.Id);
 
                 DiffuseMaterial diffuseMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Red));
 
                 GeometryModel3D geometryModel3D = new GeometryModel3D(meshGeometry3D, diffuseMaterial);
+
+
+                RotateTransform3D rotateTransform3D = new RotateTransform3D();
+
+                rotateTransform3D.Rotation = myAngleRotation;
+
+
+                Transform3DGroup myTransform3DGroup = new Transform3DGroup();
+                myTransform3DGroup.Children.Add(rotateTransform3D);
+
+
+                geometryModel3D.Transform = myTransform3DGroup;
 
                 model3dGroup.Children.Add(geometryModel3D);
 
@@ -70,11 +83,11 @@ namespace pz3_Grafika
             foreach (var sub in xmlEntities.Substations)
             {
 
-                if (sub.Longitude == 0 || sub.Latitude == 0 || collectionOfNodesID.ContainsKey(sub.Id))
+                if (sub.Longitude == 0 || sub.Latitude == 0 )
                 {
                     continue;
                 }
-                collectionOfNodesID.Add(sub.Id, new grafikaPZ3.Model.Point());
+                //collectionOfNodesID.Add(sub.Id, sub);
 
                 MeshGeometry3D meshGeometry3D = createCubeMeshGeometry(sub.Longitude, sub.Latitude, sub.Id);
 
@@ -82,18 +95,31 @@ namespace pz3_Grafika
 
                 GeometryModel3D geometryModel3D = new GeometryModel3D(meshGeometry3D, diffuseMaterial);
 
+
+                RotateTransform3D rotateTransform3D = new RotateTransform3D();
+
+                rotateTransform3D.Rotation = myAngleRotation;
+
+
+                Transform3DGroup myTransform3DGroup = new Transform3DGroup();
+                myTransform3DGroup.Children.Add(rotateTransform3D);
+
+
+                geometryModel3D.Transform = myTransform3DGroup;
+
+
                 model3dGroup.Children.Add(geometryModel3D);
 
             }
 
             foreach (var sw in xmlEntities.Switches)
             {
-                if (sw.Longitude == 0 || sw.Latitude == 0 || collectionOfNodesID.ContainsKey(sw.Id))
+                if (sw.Longitude == 0 || sw.Latitude == 0 )
                 {
                     continue;
                 }
 
-                collectionOfNodesID.Add(sw.Id, new grafikaPZ3.Model.Point());
+                //collectionOfNodesID.Add(sw.Id, sw);
 
                 MeshGeometry3D meshGeometry3D = createCubeMeshGeometry(sw.Longitude, sw.Latitude, sw.Id);
 
@@ -101,13 +127,114 @@ namespace pz3_Grafika
 
                 GeometryModel3D geometryModel3D = new GeometryModel3D(meshGeometry3D, diffuseMaterial);
 
+
+
+                RotateTransform3D rotateTransform3D = new RotateTransform3D();
+
+                rotateTransform3D.Rotation = myAngleRotation;
+
+
+                Transform3DGroup myTransform3DGroup = new Transform3DGroup();
+                myTransform3DGroup.Children.Add(rotateTransform3D);
+
+
+                geometryModel3D.Transform = myTransform3DGroup;
+
+
                 model3dGroup.Children.Add(geometryModel3D);
 
             }
 
+            foreach(var line in xmlEntities.Lines)
+            {
+                System.Windows.Point point1 = new System.Windows.Point();
+                System.Windows.Point point2 = new System.Windows.Point();
+                var cnt = 1;
+                System.Windows.Point Startpoint = new System.Windows.Point();
+                System.Windows.Point Endpoint = new System.Windows.Point();
+
+                if(collectionOfNodesID.ContainsKey(line.FirstEnd) && collectionOfNodesID.ContainsKey(line.SecondEnd))
+                {
+                    Startpoint = CreatePoint(collectionOfNodesID[line.FirstEnd].Longitude, collectionOfNodesID[line.FirstEnd].Latitude);
+                    Endpoint = CreatePoint(collectionOfNodesID[line.SecondEnd].Longitude, collectionOfNodesID[line.SecondEnd].Latitude);
+               
+                }
+                else
+                {
+                    continue; //Preskoci vod alo povezuje cvorove koji nisu na nasoj mapi, ovo je obezbedjeno vec pri citanju iz xml
+                }
+
+                foreach (var point in line.Vertices)
+                {
+                    if (cnt == 1)
+                    {
+                        point1 = CreatePoint(point.Longitude, point.Latitude);
+                        model3dGroup.Children.Add(createLineGeometryModel3D(Startpoint, point1,myAngleRotation));
+                        cnt++;
+                        continue;
+                    }
+                    else if (cnt == 2)
+                    {
+                        point2 = CreatePoint(point.Longitude, point.Latitude);
+                        model3dGroup.Children.Add(createLineGeometryModel3D(point1, point2, myAngleRotation));
+                        point1 = point2;
+                    }
 
 
+                }
+          
+                model3dGroup.Children.Add(createLineGeometryModel3D(point2, Endpoint, myAngleRotation));
+
+
+            }
         }
+
+        private static GeometryModel3D createLineGeometryModel3D(System.Windows.Point point1, System.Windows.Point point2, AxisAngleRotation3D myAngleRotation)
+        {
+            MeshGeometry3D meshGeometry3D = new MeshGeometry3D();
+            List<Point3D> points = new List<Point3D>();
+            points.Add(new Point3D(point1.X, point1.Y, 0));
+            points.Add(new Point3D(point1.X, point1.Y, 4));
+            points.Add(new Point3D(point2.X, point2.Y, 0));
+            points.Add(new Point3D(point2.X, point2.Y, 4));
+
+            meshGeometry3D.Positions = new Point3DCollection(points);
+            meshGeometry3D.TriangleIndices.Add(0);
+            meshGeometry3D.TriangleIndices.Add(2);
+            meshGeometry3D.TriangleIndices.Add(3);
+            meshGeometry3D.TriangleIndices.Add(0);
+            meshGeometry3D.TriangleIndices.Add(3);
+            meshGeometry3D.TriangleIndices.Add(1);
+
+
+            meshGeometry3D.TriangleIndices.Add(0);
+            meshGeometry3D.TriangleIndices.Add(3);
+            meshGeometry3D.TriangleIndices.Add(2);
+            meshGeometry3D.TriangleIndices.Add(0);
+            meshGeometry3D.TriangleIndices.Add(1);
+            meshGeometry3D.TriangleIndices.Add(3);
+
+            DiffuseMaterial diffuseMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Yellow));
+
+            GeometryModel3D geometryModel3D = new GeometryModel3D(meshGeometry3D, diffuseMaterial);
+
+
+
+            RotateTransform3D rotateTransform3D = new RotateTransform3D();
+
+            rotateTransform3D.Rotation = myAngleRotation;
+
+
+            Transform3DGroup myTransform3DGroup = new Transform3DGroup();
+            myTransform3DGroup.Children.Add(rotateTransform3D);
+
+
+            geometryModel3D.Transform = myTransform3DGroup;
+
+            return geometryModel3D;
+        }
+
+
 
         private static MeshGeometry3D createCubeMeshGeometry(double Longitude, double Latitude, long EntityID)
         {
@@ -117,27 +244,28 @@ namespace pz3_Grafika
 
             if (numberOfEntityOnPoint.ContainsKey(point))
             {
-                numberOfEntity = numberOfEntityOnPoint[point];
                 numberOfEntityOnPoint[point]++;
+                numberOfEntity = numberOfEntityOnPoint[point];
             }
             else
             {
                 numberOfEntityOnPoint[point] = 1;
+                numberOfEntity = 1;
             }
 
             MeshGeometry3D meshGeometry3D = new MeshGeometry3D();
             List<Point3D> points = new List<Point3D>();
-            points.Add(new Point3D(point.X - 4, point.Y - 4, (numberOfEntity + 1) * 0));
-            points.Add(new Point3D(point.X + 4, point.Y - 4, (numberOfEntity + 1) * 0));
-            points.Add(new Point3D(point.X + 4, point.Y - 4, (numberOfEntity + 1) * 10));
-            points.Add(new Point3D(point.X - 4, point.Y - 4, (numberOfEntity + 1) * 10));
+            points.Add(new Point3D(point.X - 4, point.Y - 4, (numberOfEntity) * 10 - 10));
+            points.Add(new Point3D(point.X + 4, point.Y - 4, (numberOfEntity) * 10 - 10));
+            points.Add(new Point3D(point.X + 4, point.Y - 4, (numberOfEntity) * 10));
+            points.Add(new Point3D(point.X - 4, point.Y - 4, (numberOfEntity ) * 10));
 
-            points.Add(new Point3D(point.X - 4, point.Y + 4, (numberOfEntity + 1) * 10));
-            points.Add(new Point3D(point.X + 4, point.Y + 4, (numberOfEntity + 1) * 10));
+            points.Add(new Point3D(point.X - 4, point.Y + 4, (numberOfEntity ) * 10));
+            points.Add(new Point3D(point.X + 4, point.Y + 4, (numberOfEntity ) * 10));
 
-            points.Add(new Point3D(point.X + 4, point.Y + 4, (numberOfEntity + 1) * 0));
+            points.Add(new Point3D(point.X + 4, point.Y + 4, (numberOfEntity ) * 10 - 10));
 
-            points.Add(new Point3D(point.X - 4, point.Y + 4, (numberOfEntity + 1) * 0));
+            points.Add(new Point3D(point.X - 4, point.Y + 4, (numberOfEntity ) * 10 - 10));
 
 
             meshGeometry3D.Positions = new Point3DCollection(points);
@@ -188,9 +316,9 @@ namespace pz3_Grafika
         {
             double ValueoOfOneLongitude = (maxLongitude - minLongitude) / 1175; //pravimo 2200delova (Longituda) jer nam je canvas 2200x2200 
             double ValueoOfOneLatitude = (maxLatitude - minLatitude) / 775;  //isto kao gore
-
-            double x = Math.Round((longitude - minLongitude) / ValueoOfOneLongitude); // koliko longituda stane u rastojanje izmedju trenutne i minimalne longitude
-            double y = Math.Round((latitude - minLatitude) / ValueoOfOneLatitude);
+           
+            double x = Math.Round((longitude - minLongitude) / ValueoOfOneLongitude)- 587.5; // koliko longituda stane u rastojanje izmedju trenutne i minimalne longitude
+            double y = Math.Round((latitude - minLatitude) / ValueoOfOneLatitude) - 387.5;
 
             x = x - x % 8; // zaokruzi na prvi broj deljiv sa 10, toliko ce nam biti rastojanje izmedju dva susedna x
             y = y - y % 8; // zaokruzi na prvi broj deljiv sa 10,, toliko ce nam biti rastojanje izmedju dva susedna y
@@ -208,6 +336,7 @@ namespace pz3_Grafika
 
         public static XmlEntities ParseXml()
         {
+            XmlEntities xmlEntities = new XmlEntities();
             var filename = "Geographic.xml";
             var currentDirectory = Directory.GetCurrentDirectory();
             var purchaseOrderFilepath = System.IO.Path.Combine(currentDirectory, filename);
@@ -239,8 +368,14 @@ namespace pz3_Grafika
                     substations.RemoveAt(i);
                     continue;
                 }
-                substations[i].Latitude = latid;
-                substations[i].Longitude = longit;
+                else
+                {
+                    substations[i].Latitude = latid;
+                    substations[i].Longitude = longit;
+                    xmlEntities.Substations.Add(substations[i]);
+                    collectionOfNodesID.Add(substations[i].Id, substations[i]);
+                }
+               
             }
 
             var nodes = xdoc.Descendants("NodeEntity")
@@ -261,8 +396,13 @@ namespace pz3_Grafika
                     nodes.RemoveAt(i);
                     continue;
                 }
-                nodes[i].Latitude = latid;
-                nodes[i].Longitude = longit;
+                else
+                {
+                    nodes[i].Latitude = latid;
+                    nodes[i].Longitude = longit;
+                    xmlEntities.Nodes.Add(nodes[i]);
+                    collectionOfNodesID.Add(nodes[i].Id, nodes[i]);
+                }
             }
 
             var switches = xdoc.Descendants("SwitchEntity")
@@ -284,8 +424,13 @@ namespace pz3_Grafika
                     switches.RemoveAt(i);
                     continue;
                 }
-                switches[i].Latitude = latid;
-                switches[i].Longitude = longit;
+                else
+                {
+                    switches[i].Latitude = latid;
+                    switches[i].Longitude = longit;
+                    xmlEntities.Switches.Add(switches[i]);
+                    collectionOfNodesID.Add(switches[i].Id, switches[i]);
+                }
             }
 
             var lines = xdoc.Descendants("LineEntity")
@@ -309,21 +454,22 @@ namespace pz3_Grafika
 
             for (int i = 0; i < lines.Count(); i++)
             {
-                var line = lines[i];
-                foreach (var point in line.Vertices)
+                if(collectionOfNodesID.ContainsKey(lines[i].SecondEnd) && collectionOfNodesID.ContainsKey(lines[i].FirstEnd))
                 {
-                    ToLatLon(point.X, point.Y, 34, out latid, out longit);
-                    if (latid < minLatitude || latid > maxLatitude || longit < minLongitude || longit > maxLongitude)
+                    var line = lines[i];
+                    foreach (var point in line.Vertices)
                     {
-                        lines.RemoveAt(i);
-                        break;
+
+                        ToLatLon(point.X, point.Y, 34, out latid, out longit);
+                        point.Latitude = latid;
+                        point.Longitude = longit;
+
                     }
-                    point.Latitude = latid;
-                    point.Longitude = longit;
+                    xmlEntities.Lines.Add(line);
                 }
             }
 
-            return new XmlEntities { Substations = substations, Switches = switches, Nodes = nodes, Lines = lines };
+            return xmlEntities;
         }
 
 
@@ -377,6 +523,33 @@ namespace pz3_Grafika
             diffOffset.X = translacija.OffsetX;
             diffOffset.Y = translacija.OffsetY;
 
+            Storyboard s = new Storyboard();
+
+            Transform3DGroup transform3DGroup = model3dGroup.Children.ElementAt(1).Transform as Transform3DGroup;
+
+            for (int j = 0; j < transform3DGroup.Children.Count; ++j)
+            {
+                if (transform3DGroup.Children.ElementAt(j) is TranslateTransform3D)
+                {
+                    TranslateTransform3D translation = transform3DGroup.Children.ElementAt(j) as TranslateTransform3D;
+
+                    DoubleAnimation doubleAnimation = new DoubleAnimation();
+                    doubleAnimation.From = 0;
+                    doubleAnimation.To = 2;
+                    doubleAnimation.Duration = new Duration(TimeSpan.FromSeconds(1));
+                    doubleAnimation.AutoReverse = true;
+                    doubleAnimation.RepeatBehavior = RepeatBehavior.Forever;
+
+                    s.Children.Add(doubleAnimation);
+                    s.Duration = new Duration(TimeSpan.FromSeconds(1));
+
+                    Storyboard.SetTarget(doubleAnimation, model3dGroup.Children.ElementAt(1));
+                    Storyboard.SetTargetProperty(doubleAnimation, new PropertyPath("(Model3D.Transform).(Transform3DGroup.Children)[1].(TranslateTransform3D.OffsetX)"));
+
+                    s.Begin(); // Exception during the execution.
+                }
+            }
+
         }
 
         private void ViewPort_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -415,6 +588,16 @@ namespace pz3_Grafika
                 translacija.OffsetZ += 10;
                 zoomCurent++;
             }
+        }
+
+        private void ViewPort_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Pressed)
+            {
+                MessageBox.Show("Middle button clicked");
+                
+            }
+
         }
     }
 }

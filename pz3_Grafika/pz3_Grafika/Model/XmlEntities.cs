@@ -9,6 +9,14 @@ namespace grafikaPZ3.Model
 {
     public class XmlEntities
     {
+        public XmlEntities()
+        {
+            Lines = new List<LineEntity>();
+            Nodes = new List<NodeEntity>();
+            Switches = new List<SwitchEntity>();
+            Substations = new List<SubstationEntity>();
+        }
+
         public List<SubstationEntity> Substations { get; set; }
         public List<NodeEntity> Nodes { get; set; }
         public List<SwitchEntity> Switches { get; set; }
