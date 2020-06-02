@@ -36,8 +36,11 @@ namespace pz3_Grafika
         private System.Windows.Point diffOffset = new System.Windows.Point();
         private int zoomMax = 50;
         private int zoomCurent = 30;
+        private bool MiddleClicked = false;
 
 
+        DoubleAnimation doubleAnimation = new DoubleAnimation(0, 360, TimeSpan.FromSeconds(15));
+        
         //point.x, ObjectCnt
         private static Dictionary<System.Windows.Point, int> numberOfEntityOnPoint = new Dictionary<System.Windows.Point, int>();
 
@@ -523,33 +526,6 @@ namespace pz3_Grafika
             diffOffset.X = translacija.OffsetX;
             diffOffset.Y = translacija.OffsetY;
 
-            Storyboard s = new Storyboard();
-
-            Transform3DGroup transform3DGroup = model3dGroup.Children.ElementAt(1).Transform as Transform3DGroup;
-
-            for (int j = 0; j < transform3DGroup.Children.Count; ++j)
-            {
-                if (transform3DGroup.Children.ElementAt(j) is TranslateTransform3D)
-                {
-                    TranslateTransform3D translation = transform3DGroup.Children.ElementAt(j) as TranslateTransform3D;
-
-                    DoubleAnimation doubleAnimation = new DoubleAnimation();
-                    doubleAnimation.From = 0;
-                    doubleAnimation.To = 2;
-                    doubleAnimation.Duration = new Duration(TimeSpan.FromSeconds(1));
-                    doubleAnimation.AutoReverse = true;
-                    doubleAnimation.RepeatBehavior = RepeatBehavior.Forever;
-
-                    s.Children.Add(doubleAnimation);
-                    s.Duration = new Duration(TimeSpan.FromSeconds(1));
-
-                    Storyboard.SetTarget(doubleAnimation, model3dGroup.Children.ElementAt(1));
-                    Storyboard.SetTargetProperty(doubleAnimation, new PropertyPath("(Model3D.Transform).(Transform3DGroup.Children)[1].(TranslateTransform3D.OffsetX)"));
-
-                    s.Begin(); // Exception during the execution.
-                }
-            }
-
         }
 
         private void ViewPort_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -570,6 +546,26 @@ namespace pz3_Grafika
                 double translateY = (offsetY)/2;
                 translacija.OffsetX = diffOffset.X + translateX;
                 translacija.OffsetY = diffOffset.Y + translateY;
+            }
+            if (MiddleClicked)
+            {
+                System.Windows.Point currentPosition = e.GetPosition(this);
+                double offsetX = currentPosition.X - start.X;
+                double offsetY = currentPosition.Y - start.Y;
+
+                if (offsetX < 0)
+                {
+                    doubleAnimation.To = -360;
+                    myAngleRotation.BeginAnimation(AxisAngleRotation3D.AngleProperty, doubleAnimation);
+                    MiddleClicked = false;
+                }
+                else
+                {
+                    doubleAnimation.To = 360;
+                    myAngleRotation.BeginAnimation(AxisAngleRotation3D.AngleProperty, doubleAnimation);
+                    MiddleClicked = false;
+                }
+               
             }
 
         }
@@ -594,10 +590,25 @@ namespace pz3_Grafika
         {
             if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Pressed)
             {
-                MessageBox.Show("Middle button clicked");
-                
-            }
+                MiddleClicked = true;
+                doubleAnimation.To = 360;
 
+                start = e.GetPosition(this);
+                diffOffset.X = translacija.OffsetX;
+                diffOffset.Y = translacija.OffsetY;
+
+            }
+        }
+
+        private void ViewPort_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Released)
+            {
+                MiddleClicked = false;
+                doubleAnimation.From = myAngleRotation.Angle;
+                doubleAnimation.To = myAngleRotation.Angle;
+                myAngleRotation.BeginAnimation(AxisAngleRotation3D.AngleProperty, doubleAnimation);
+            }
         }
     }
 }

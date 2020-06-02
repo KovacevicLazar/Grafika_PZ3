@@ -12,7 +12,7 @@
     <Grid>
         <Viewport3D x:Name="ViewPort" MouseLeftButtonDown="ViewPort_MouseLeftButtonDown"
                     MouseLeftButtonUp="ViewPort_MouseLeftButtonUp"  MouseMove="ViewPort_MouseMove"
-                    MouseWheel="ViewPort_MouseWheel" MouseDown="ViewPort_MouseDown">
+                    MouseWheel="ViewPort_MouseWheel" MouseDown="ViewPort_MouseDown" MouseUp="ViewPort_MouseUp">
            
 
             <Viewport3D.Camera>
@@ -36,8 +36,6 @@
                 <ModelVisual3D.Content>
                     <Model3DGroup x:Name="model3dGroup">
 
-                       
-
                         <GeometryModel3D>
                             <GeometryModel3D.Geometry>
                                 <MeshGeometry3D Positions = "-587.5,-387.5,0    -587.5,387.5,0    587.5,-387.5,0    587.5,387.5,0" TriangleIndices = "0,2,1 1,2,3"  TextureCoordinates="0,1 0,0 1,1 1,0" />
@@ -54,29 +52,19 @@
                             <GeometryModel3D.Transform>
                                 <RotateTransform3D x:Name="Rotate">
                                     <RotateTransform3D.Rotation>
-                                        <AxisAngleRotation3D x:Name="myAngleRotation" Axis="0,0,1" Angle="0.05" />
+                                        <AxisAngleRotation3D x:Name="myAngleRotation" Axis="0,0,1" Angle="0" />
                                     </RotateTransform3D.Rotation>
                                 </RotateTransform3D>
                             </GeometryModel3D.Transform>
                         </GeometryModel3D>
+
                     </Model3DGroup>
                 </ModelVisual3D.Content>
             </ModelVisual3D>
 
 
 
-            <Viewport3D.Triggers>
-                <EventTrigger RoutedEvent="Viewport3D.Loaded">
-                    <BeginStoryboard>
-                        <Storyboard x:Name="sb">
-                            <DoubleAnimation x:Name="da"
-                              Storyboard.TargetName="myAngleRotation"
-                              Storyboard.TargetProperty="Angle"
-                              From="0" To="360" Duration="0:0:10"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Viewport3D.Triggers>
+           
 
         </Viewport3D>
 
