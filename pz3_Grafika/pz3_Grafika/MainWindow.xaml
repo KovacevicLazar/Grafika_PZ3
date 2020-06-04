@@ -9,10 +9,10 @@
         Title="PowerGrid">
 
 
-    <Grid>
+    <Grid x:Name="grid">
         <Viewport3D x:Name="ViewPort" MouseLeftButtonDown="ViewPort_MouseLeftButtonDown"
                     MouseLeftButtonUp="ViewPort_MouseLeftButtonUp"  MouseMove="ViewPort_MouseMove"
-                    MouseWheel="ViewPort_MouseWheel" MouseDown="ViewPort_MouseDown" MouseUp="ViewPort_MouseUp">
+                    MouseWheel="ViewPort_MouseWheel" MouseDown="ViewPort_MouseDown" MouseUp="ViewPort_MouseUp" MouseRightButtonDown="ViewPort_MouseRightButtonDown">
 
 
             <Viewport3D.Camera>

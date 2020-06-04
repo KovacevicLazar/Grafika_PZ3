@@ -30,16 +30,19 @@ namespace pz3_Grafika
 
         public const double minLatitude = 45.2325;
         public const double maxLatitude = 45.277031;
-
+        private GeometryModel3D hitgeo;
 
         private System.Windows.Point start = new System.Windows.Point();
         private System.Windows.Point diffOffset = new System.Windows.Point();
         private int zoomMax = 50;
         private int zoomCurent = 30;
         private bool MiddleClicked = false;
+        System.Windows.Point mousePositionForToolTip = new System.Windows.Point();
 
-
+        ToolTip toolTip = new ToolTip();
         DoubleAnimation doubleAnimation = new DoubleAnimation(0, 360, TimeSpan.FromSeconds(15));
+
+        Dictionary<GeometryModel3D, PowerEntity> geometryAndEntyty = new Dictionary<GeometryModel3D, PowerEntity>();
         
         //point.x, ObjectCnt
         private static Dictionary<System.Windows.Point, int> numberOfEntityOnPoint = new Dictionary<System.Windows.Point, int>();
@@ -58,99 +61,62 @@ namespace pz3_Grafika
 
             foreach (var node in xmlEntities.Nodes)
             {
-                if (node.Longitude == 0 || node.Latitude == 0 )
-                {
-                    continue; 
-                }
-                //collectionOfNodesID.Add(node.Id, node);
-
                 MeshGeometry3D meshGeometry3D = createCubeMeshGeometry(node.Longitude, node.Latitude, node.Id);
-
                 DiffuseMaterial diffuseMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Red));
 
                 GeometryModel3D geometryModel3D = new GeometryModel3D(meshGeometry3D, diffuseMaterial);
 
-
                 RotateTransform3D rotateTransform3D = new RotateTransform3D();
-
                 rotateTransform3D.Rotation = myAngleRotation;
-
 
                 Transform3DGroup myTransform3DGroup = new Transform3DGroup();
                 myTransform3DGroup.Children.Add(rotateTransform3D);
 
-
                 geometryModel3D.Transform = myTransform3DGroup;
 
-
+                geometryAndEntyty.Add(geometryModel3D, node);
                 NodeGeometryModels.Add(geometryModel3D);
                 model3dGroup.Children.Add(geometryModel3D);
-
-
             }
 
             foreach (var sub in xmlEntities.Substations)
             {
-
-                if (sub.Longitude == 0 || sub.Latitude == 0 )
-                {
-                    continue;
-                }
-                //collectionOfNodesID.Add(sub.Id, sub);
-
                 MeshGeometry3D meshGeometry3D = createCubeMeshGeometry(sub.Longitude, sub.Latitude, sub.Id);
-
                 DiffuseMaterial diffuseMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Blue));
 
                 GeometryModel3D geometryModel3D = new GeometryModel3D(meshGeometry3D, diffuseMaterial);
 
-
                 RotateTransform3D rotateTransform3D = new RotateTransform3D();
-
                 rotateTransform3D.Rotation = myAngleRotation;
-
 
                 Transform3DGroup myTransform3DGroup = new Transform3DGroup();
                 myTransform3DGroup.Children.Add(rotateTransform3D);
 
-
                 geometryModel3D.Transform = myTransform3DGroup;
 
+                geometryAndEntyty.Add(geometryModel3D, sub);
                 SubstationGeometryModels.Add(geometryModel3D);
                 model3dGroup.Children.Add(geometryModel3D);
-
             }
 
             foreach (var sw in xmlEntities.Switches)
             {
-                if (sw.Longitude == 0 || sw.Latitude == 0 )
-                {
-                    continue;
-                }
-
-                //collectionOfNodesID.Add(sw.Id, sw);
-
                 MeshGeometry3D meshGeometry3D = createCubeMeshGeometry(sw.Longitude, sw.Latitude, sw.Id);
-
                 DiffuseMaterial diffuseMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Green));
 
                 GeometryModel3D geometryModel3D = new GeometryModel3D(meshGeometry3D, diffuseMaterial);
                 
-
                 RotateTransform3D rotateTransform3D = new RotateTransform3D();
-
                 rotateTransform3D.Rotation = myAngleRotation;
-
 
                 Transform3DGroup myTransform3DGroup = new Transform3DGroup();
                 myTransform3DGroup.Children.Add(rotateTransform3D);
 
-
                 geometryModel3D.Transform = myTransform3DGroup;
 
+                geometryAndEntyty.Add(geometryModel3D, sw);
                 SwitchGeometryModels.Add(geometryModel3D);
                 model3dGroup.Children.Add(geometryModel3D);
-
             }
 
             foreach(var line in xmlEntities.Lines)
@@ -169,7 +135,7 @@ namespace pz3_Grafika
                 }
                 else
                 {
-                    continue; //Preskoci vod alo povezuje cvorove koji nisu na nasoj mapi, ovo je obezbedjeno vec pri citanju iz xml
+                    continue; //Preskoci vod aKo povezuje cvorove koji nisu na nasoj mapi, ovo je obezbedjeno vec pri citanju iz xml
                 }
 
                 foreach (var point in line.Vertices)
@@ -187,15 +153,9 @@ namespace pz3_Grafika
                         model3dGroup.Children.Add(createLineGeometryModel3D(point1, point2, myAngleRotation));
                         point1 = point2;
                     }
-
-
                 }
-          
                 model3dGroup.Children.Add(createLineGeometryModel3D(point2, Endpoint, myAngleRotation));
-
-
             }
-            
         }
 
         private static GeometryModel3D createLineGeometryModel3D(System.Windows.Point point1, System.Windows.Point point2, AxisAngleRotation3D myAngleRotation)
@@ -229,7 +189,7 @@ namespace pz3_Grafika
             meshGeometry3D.TriangleIndices.Add(7);
 
 
-             meshGeometry3D.TriangleIndices.Add(0);
+            meshGeometry3D.TriangleIndices.Add(0);
             meshGeometry3D.TriangleIndices.Add(3);
             meshGeometry3D.TriangleIndices.Add(2);
             meshGeometry3D.TriangleIndices.Add(0);
@@ -248,22 +208,16 @@ namespace pz3_Grafika
 
             GeometryModel3D geometryModel3D = new GeometryModel3D(meshGeometry3D, diffuseMaterial);
 
-
-
             RotateTransform3D rotateTransform3D = new RotateTransform3D();
-
             rotateTransform3D.Rotation = myAngleRotation;
-
 
             Transform3DGroup myTransform3DGroup = new Transform3DGroup();
             myTransform3DGroup.Children.Add(rotateTransform3D);
-
 
             geometryModel3D.Transform = myTransform3DGroup;
 
             return geometryModel3D;
         }
-
 
 
         private static MeshGeometry3D createCubeMeshGeometry(double Longitude, double Latitude, long EntityID)
@@ -292,9 +246,7 @@ namespace pz3_Grafika
 
             points.Add(new Point3D(point.X - 4, point.Y + 4, (numberOfEntity ) * 10));
             points.Add(new Point3D(point.X + 4, point.Y + 4, (numberOfEntity ) * 10));
-
             points.Add(new Point3D(point.X + 4, point.Y + 4, (numberOfEntity ) * 10 - 10));
-
             points.Add(new Point3D(point.X - 4, point.Y + 4, (numberOfEntity ) * 10 - 10));
 
 
@@ -306,7 +258,6 @@ namespace pz3_Grafika
             meshGeometry3D.TriangleIndices.Add(2);
             meshGeometry3D.TriangleIndices.Add(3);
 
-
             meshGeometry3D.TriangleIndices.Add(3);
             meshGeometry3D.TriangleIndices.Add(5);
             meshGeometry3D.TriangleIndices.Add(4);
@@ -335,11 +286,8 @@ namespace pz3_Grafika
             meshGeometry3D.TriangleIndices.Add(5);
             meshGeometry3D.TriangleIndices.Add(6);
 
-
-
             return meshGeometry3D;
         }
-
 
 
         private static System.Windows.Point CreatePoint(double longitude, double latitude)
@@ -353,7 +301,6 @@ namespace pz3_Grafika
             x = x - x % 8; // zaokruzi na prvi broj deljiv sa 10, toliko ce nam biti rastojanje izmedju dva susedna x
             y = y - y % 8; // zaokruzi na prvi broj deljiv sa 10,, toliko ce nam biti rastojanje izmedju dva susedna y
 
-
             return new System.Windows.Point
             {
                 X = x,
@@ -361,6 +308,200 @@ namespace pz3_Grafika
             };
         }
 
+
+        private void ViewPort_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            toolTip.IsOpen = false; //UKLONI Tooltip nakon klika
+            ViewPort.CaptureMouse();
+            start = e.GetPosition(this);
+            diffOffset.X = translacija.OffsetX;
+            diffOffset.Y = translacija.OffsetY;
+        }
+
+        private void ViewPort_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            ViewPort.ReleaseMouseCapture();
+        }
+
+        private void ViewPort_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (ViewPort.IsMouseCaptured)
+            {
+                toolTip.IsOpen = false;
+                System.Windows.Point currentPosition = e.GetPosition(this);
+                double offsetX = currentPosition.X - start.X;
+                double offsetY = currentPosition.Y - start.Y;
+             
+                double translateX = -(offsetX)/2; //Usporavam kretanje za duplo
+                double translateY = (offsetY)/2;
+                translacija.OffsetX = diffOffset.X + translateX;
+                translacija.OffsetY = diffOffset.Y + translateY;
+            }
+            if (MiddleClicked)
+            {
+                System.Windows.Point currentPosition = e.GetPosition(this);
+                double offsetX = currentPosition.X - start.X;
+                double offsetY = currentPosition.Y - start.Y;
+
+                if (offsetX < 0)
+                {
+                    doubleAnimation.To = -360;
+                }
+                else
+                {
+                    doubleAnimation.To = 360;
+                }
+                myAngleRotation.BeginAnimation(AxisAngleRotation3D.AngleProperty, doubleAnimation);
+                MiddleClicked = false;
+            }
+        }
+
+        private void ViewPort_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            toolTip.IsOpen = false;
+            Point3D p = new Point3D( CAMERA.Position.X, CAMERA.Position.Y,CAMERA.Position.Z);
+         
+            if (e.Delta > 0 && zoomCurent > -zoomMax)
+            {
+                translacija.OffsetZ -= 10;
+                zoomCurent--;
+                
+            }
+            else if (e.Delta <= 0 && zoomCurent < zoomMax)
+            {  
+                translacija.OffsetZ += 10;
+                zoomCurent++;
+            }
+        }
+
+        private void ViewPort_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Pressed)
+            {
+                toolTip.IsOpen = false;
+                MiddleClicked = true;
+                doubleAnimation.To = 360;
+                start = e.GetPosition(this);
+                diffOffset.X = translacija.OffsetX;
+                diffOffset.Y = translacija.OffsetY;
+            }
+        }
+
+        private void ViewPort_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Released)
+            {
+                MiddleClicked = false;
+                doubleAnimation.From = myAngleRotation.Angle; //ostani na na istom uglu nakon pustanja tastera
+                doubleAnimation.To = myAngleRotation.Angle;
+                myAngleRotation.BeginAnimation(AxisAngleRotation3D.AngleProperty, doubleAnimation);
+            }
+        }
+
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            var checkBox = sender as CheckBox;
+            if (checkBox.Content.ToString() == "Switchs")
+            {
+                foreach (var geoModel in SwitchGeometryModels)
+                {
+                    model3dGroup.Children.Remove(geoModel);
+                }
+            }
+            else if (checkBox.Content.ToString() == "Nodes")
+            {
+                foreach (var geoModel in NodeGeometryModels)
+                {
+                    model3dGroup.Children.Remove(geoModel);
+                }
+            }
+            else if (checkBox.Content.ToString() == "Substations")
+            {
+                foreach (var geoModel in SubstationGeometryModels)
+                {
+                    model3dGroup.Children.Remove(geoModel);
+                }
+            }
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            var checkBox = sender as CheckBox;
+          
+            if(checkBox.Content.ToString() == "Switchs")
+            {
+                foreach(var geoModel in SwitchGeometryModels)
+                {
+                    model3dGroup.Children.Add(geoModel);
+                }
+            }
+            else if (checkBox.Content.ToString() == "Nodes")
+            {
+                foreach (var geoModel in NodeGeometryModels)
+                {
+                    model3dGroup.Children.Add(geoModel);
+                }
+            }
+            else if (checkBox.Content.ToString() == "Substations")
+            {
+                foreach (var geoModel in SubstationGeometryModels)
+                {
+                    model3dGroup.Children.Add(geoModel);
+                }
+            }
+        }
+
+        private void ViewPort_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            mousePositionForToolTip = e.GetPosition(ViewPort);
+            Point3D testpoint3D = new Point3D(mousePositionForToolTip.X, mousePositionForToolTip.Y, 0);
+            Vector3D testdirection = new Vector3D(mousePositionForToolTip.X, mousePositionForToolTip.Y, 10);
+
+            PointHitTestParameters pointparams = new PointHitTestParameters(mousePositionForToolTip);
+            RayHitTestParameters rayparams = new RayHitTestParameters(testpoint3D, testdirection);
+
+            hitgeo = null;
+            VisualTreeHelper.HitTest(ViewPort, null, HTResult, pointparams);
+        }
+
+
+        private HitTestResultBehavior HTResult(System.Windows.Media.HitTestResult rawresult)
+        {
+
+            RayHitTestResult rayResult = rawresult as RayHitTestResult;
+
+            if (rayResult != null)
+            {
+
+                bool gasit = false;
+                for (int i = 0; i < geometryAndEntyty.Keys.Count(); i++)
+                {
+                    if ((GeometryModel3D)geometryAndEntyty.Keys.ToList()[i] == rayResult.ModelHit)
+                    {
+                        hitgeo = (GeometryModel3D)rayResult.ModelHit;
+                        gasit = true;
+                        var entity=geometryAndEntyty[hitgeo];
+
+                        toolTip = new ToolTip();
+                        toolTip.Content = "\tPOWER ENTITY:\nID: " + entity.Id.ToString() + "\nName: " + entity.Name + "\nType: " + entity.GetType().Name;
+                        //toolTip.Margin = new Thickness(mousePositionForToolTip.X, mousePositionForToolTip.Y, 0, 0);
+                        toolTip.Height = 80;
+                        toolTip.IsOpen = true;
+                        ToolTipService.SetPlacement(ViewPort, System.Windows.Controls.Primitives.PlacementMode.Mouse);
+                        break;
+                    }
+                    else
+                    {
+                        toolTip.IsOpen = false;
+                    }
+                }
+                if (!gasit)
+                {
+                    hitgeo = null;
+                }
+            }
+            return HitTestResultBehavior.Stop;
+        }
 
 
 
@@ -405,7 +546,7 @@ namespace pz3_Grafika
                     xmlEntities.Substations.Add(substations[i]);
                     collectionOfNodesID.Add(substations[i].Id, substations[i]);
                 }
-               
+
             }
 
             var nodes = xdoc.Descendants("NodeEntity")
@@ -484,7 +625,7 @@ namespace pz3_Grafika
 
             for (int i = 0; i < lines.Count(); i++)
             {
-                if(collectionOfNodesID.ContainsKey(lines[i].SecondEnd) && collectionOfNodesID.ContainsKey(lines[i].FirstEnd))
+                if (collectionOfNodesID.ContainsKey(lines[i].SecondEnd) && collectionOfNodesID.ContainsKey(lines[i].FirstEnd))
                 {
                     var line = lines[i];
                     foreach (var point in line.Vertices)
@@ -543,161 +684,6 @@ namespace pz3_Grafika
 
             longitude = ((delt * (180.0 / Math.PI)) + s) + diflon;
             latitude = ((lat + (1 + e2cuadrada * Math.Pow(Math.Cos(lat), 2) - (3.0 / 2.0) * e2cuadrada * Math.Sin(lat) * Math.Cos(lat) * (tao - lat)) * (tao - lat)) * (180.0 / Math.PI)) + diflat;
-        }
-
-        private void ViewPort_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-
-            ViewPort.CaptureMouse();
-            start = e.GetPosition(this);
-            diffOffset.X = translacija.OffsetX;
-            diffOffset.Y = translacija.OffsetY;
-
-        }
-
-        private void ViewPort_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            ViewPort.ReleaseMouseCapture();
-        }
-
-        private void ViewPort_MouseMove(object sender, MouseEventArgs e)
-        {
-
-            if (ViewPort.IsMouseCaptured)
-            {
-                System.Windows.Point currentPosition = e.GetPosition(this);
-                double offsetX = currentPosition.X - start.X;
-                double offsetY = currentPosition.Y - start.Y;
-             
-                double translateX = -(offsetX)/2; //Usporavam kretanje za duplo
-                double translateY = (offsetY)/2;
-                translacija.OffsetX = diffOffset.X + translateX;
-                translacija.OffsetY = diffOffset.Y + translateY;
-            }
-            if (MiddleClicked)
-            {
-                System.Windows.Point currentPosition = e.GetPosition(this);
-                double offsetX = currentPosition.X - start.X;
-                double offsetY = currentPosition.Y - start.Y;
-
-                if (offsetX < 0)
-                {
-                    doubleAnimation.To = -360;
-                    myAngleRotation.BeginAnimation(AxisAngleRotation3D.AngleProperty, doubleAnimation);
-                    MiddleClicked = false;
-                }
-                else
-                {
-                    doubleAnimation.To = 360;
-                    myAngleRotation.BeginAnimation(AxisAngleRotation3D.AngleProperty, doubleAnimation);
-                    MiddleClicked = false;
-                }
-               
-            }
-
-        }
-
-        private void ViewPort_MouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            Point3D p = new Point3D( CAMERA.Position.X, CAMERA.Position.Y,CAMERA.Position.Z);
-         
-            if (e.Delta > 0 && zoomCurent > -zoomMax)
-            {
-                translacija.OffsetZ -= 10;
-                zoomCurent--;
-            }
-            else if (e.Delta <= 0 && zoomCurent < zoomMax)
-            {  
-                translacija.OffsetZ += 10;
-                zoomCurent++;
-            }
-        }
-
-        private void ViewPort_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Pressed)
-            {
-                MiddleClicked = true;
-                doubleAnimation.To = 360;
-
-                start = e.GetPosition(this);
-                diffOffset.X = translacija.OffsetX;
-                diffOffset.Y = translacija.OffsetY;
-
-            }
-        }
-
-        private void ViewPort_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Released)
-            {
-                MiddleClicked = false;
-                doubleAnimation.From = myAngleRotation.Angle;
-                doubleAnimation.To = myAngleRotation.Angle;
-                myAngleRotation.BeginAnimation(AxisAngleRotation3D.AngleProperty, doubleAnimation);
-            }
-        }
-
-       
-
-
-        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            var checkBox = sender as CheckBox;
-            if (checkBox.Content.ToString() == "Switchs")
-            {
-                foreach (var geoModel in SwitchGeometryModels)
-                {
-                    model3dGroup.Children.Remove(geoModel);
-                }
-
-            }
-            else if (checkBox.Content.ToString() == "Nodes")
-            {
-                foreach (var geoModel in NodeGeometryModels)
-                {
-                    model3dGroup.Children.Remove(geoModel);
-                }
-
-            }
-            else if (checkBox.Content.ToString() == "Substations")
-            {
-                foreach (var geoModel in SubstationGeometryModels)
-                {
-                    model3dGroup.Children.Remove(geoModel);
-                }
-
-            }
-        }
-
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            var checkBox = sender as CheckBox;
-          
-            if(checkBox.Content.ToString() == "Switchs")
-            {
-                foreach(var geoModel in SwitchGeometryModels)
-                {
-                    model3dGroup.Children.Add(geoModel);
-                }
-
-            }
-            else if (checkBox.Content.ToString() == "Nodes")
-            {
-                foreach (var geoModel in NodeGeometryModels)
-                {
-                    model3dGroup.Children.Add(geoModel);
-                }
-
-            }
-            else if (checkBox.Content.ToString() == "Substations")
-            {
-                foreach (var geoModel in SubstationGeometryModels)
-                {
-                    model3dGroup.Children.Add(geoModel);
-                }
-
-            }
         }
     }
 }
