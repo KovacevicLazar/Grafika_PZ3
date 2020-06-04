@@ -7,20 +7,20 @@
         mc:Ignorable="d"
         WindowState="Maximized"
         Title="PowerGrid">
-        
+
 
     <Grid>
         <Viewport3D x:Name="ViewPort" MouseLeftButtonDown="ViewPort_MouseLeftButtonDown"
                     MouseLeftButtonUp="ViewPort_MouseLeftButtonUp"  MouseMove="ViewPort_MouseMove"
                     MouseWheel="ViewPort_MouseWheel" MouseDown="ViewPort_MouseDown" MouseUp="ViewPort_MouseUp">
-           
+
 
             <Viewport3D.Camera>
                 <PerspectiveCamera x:Name="CAMERA" Position = "1 -650 850" LookDirection = "0,3.4,-5" FieldOfView = "65"  >
-                <PerspectiveCamera.Transform>
+                    <PerspectiveCamera.Transform>
                         <Transform3DGroup>
-                        <TranslateTransform3D x:Name="translacija" OffsetX="0" OffsetY="0" OffsetZ="0"/>
-                       
+                            <TranslateTransform3D x:Name="translacija" OffsetX="0" OffsetY="0" OffsetZ="0"/>
+
                         </Transform3DGroup>
                     </PerspectiveCamera.Transform>
                 </PerspectiveCamera>
@@ -36,7 +36,7 @@
                 <ModelVisual3D.Content>
                     <Model3DGroup x:Name="model3dGroup">
 
-                        <GeometryModel3D>
+                        <GeometryModel3D >
                             <GeometryModel3D.Geometry>
                                 <MeshGeometry3D Positions = "-587.5,-387.5,0    -587.5,387.5,0    587.5,-387.5,0    587.5,387.5,0" TriangleIndices = "0,2,1 1,2,3"  TextureCoordinates="0,1 0,0 1,1 1,0" />
                             </GeometryModel3D.Geometry>
@@ -64,9 +64,30 @@
 
 
 
-           
+
 
         </Viewport3D>
+
+
+
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="136" Margin="10,10,0,0" VerticalAlignment="Top" Width="162" >
+            <Border.Background>
+                <SolidColorBrush Opacity="0.85" Color="#c4d7ff"/>
+            </Border.Background>
+
+            <StackPanel HorizontalAlignment="Left" Height="136" Margin="-1" VerticalAlignment="Top" Width="162">
+                <Label FontWeight="Bold" FontSize="16">Select Entity:</Label>
+                <CheckBox Content="Nodes" VerticalContentAlignment="Center" FontWeight="Bold" FontSize="20" Margin="5,0,0,0"  HorizontalAlignment="Left" VerticalAlignment="Top" IsChecked="True" Unchecked="CheckBox_Unchecked" Checked="CheckBox_Checked" Width="147" ></CheckBox>
+                <CheckBox Content="Switchs" VerticalContentAlignment="Center" FontWeight="Bold" FontSize="20" Margin="5,5,0,0" HorizontalAlignment="Left"  VerticalAlignment="Top" IsChecked="True" Unchecked="CheckBox_Unchecked" Checked="CheckBox_Checked" Width="147"/>
+                <CheckBox Content="Substations" VerticalContentAlignment="Center" FontWeight="Bold" FontSize="20" Margin="5,5,0,0" HorizontalAlignment="Left"  VerticalAlignment="Top" IsChecked="True" Unchecked="CheckBox_Unchecked" Checked="CheckBox_Checked" Width="147"/>
+            </StackPanel>
+
+        </Border>
+
+
+
+
+
 
     </Grid>
 </Window>

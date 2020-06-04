@@ -46,6 +46,10 @@ namespace pz3_Grafika
 
         private static Dictionary<long, PowerEntity> collectionOfNodesID = new Dictionary<long, PowerEntity>();
 
+        List<GeometryModel3D> SwitchGeometryModels = new List<GeometryModel3D>();
+        List<GeometryModel3D> NodeGeometryModels = new List<GeometryModel3D>();
+        List<GeometryModel3D> SubstationGeometryModels = new List<GeometryModel3D>();
+
         public XmlEntities xmlEntities { get; set; }
         public MainWindow()
         {
@@ -78,6 +82,8 @@ namespace pz3_Grafika
 
                 geometryModel3D.Transform = myTransform3DGroup;
 
+
+                NodeGeometryModels.Add(geometryModel3D);
                 model3dGroup.Children.Add(geometryModel3D);
 
 
@@ -110,7 +116,7 @@ namespace pz3_Grafika
 
                 geometryModel3D.Transform = myTransform3DGroup;
 
-
+                SubstationGeometryModels.Add(geometryModel3D);
                 model3dGroup.Children.Add(geometryModel3D);
 
             }
@@ -129,8 +135,7 @@ namespace pz3_Grafika
                 DiffuseMaterial diffuseMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Green));
 
                 GeometryModel3D geometryModel3D = new GeometryModel3D(meshGeometry3D, diffuseMaterial);
-
-
+                
 
                 RotateTransform3D rotateTransform3D = new RotateTransform3D();
 
@@ -143,7 +148,7 @@ namespace pz3_Grafika
 
                 geometryModel3D.Transform = myTransform3DGroup;
 
-
+                SwitchGeometryModels.Add(geometryModel3D);
                 model3dGroup.Children.Add(geometryModel3D);
 
             }
@@ -190,16 +195,22 @@ namespace pz3_Grafika
 
 
             }
+            
         }
 
         private static GeometryModel3D createLineGeometryModel3D(System.Windows.Point point1, System.Windows.Point point2, AxisAngleRotation3D myAngleRotation)
         {
             MeshGeometry3D meshGeometry3D = new MeshGeometry3D();
             List<Point3D> points = new List<Point3D>();
-            points.Add(new Point3D(point1.X, point1.Y, 0));
-            points.Add(new Point3D(point1.X, point1.Y, 4));
-            points.Add(new Point3D(point2.X, point2.Y, 0));
-            points.Add(new Point3D(point2.X, point2.Y, 4));
+            points.Add(new Point3D(point1.X+1, point1.Y+1, 0));
+            points.Add(new Point3D(point1.X, point1.Y, 6));
+            points.Add(new Point3D(point2.X+1, point2.Y+1, 0));
+            points.Add(new Point3D(point2.X, point2.Y, 6));
+
+            points.Add(new Point3D(point1.X - 1, point1.Y - 1, 0));
+            points.Add(new Point3D(point1.X, point1.Y, 6));
+            points.Add(new Point3D(point2.X - 1, point2.Y - 1, 0));
+            points.Add(new Point3D(point2.X , point2.Y, 6));
 
             meshGeometry3D.Positions = new Point3DCollection(points);
             meshGeometry3D.TriangleIndices.Add(0);
@@ -210,14 +221,30 @@ namespace pz3_Grafika
             meshGeometry3D.TriangleIndices.Add(1);
 
 
-            meshGeometry3D.TriangleIndices.Add(0);
+            meshGeometry3D.TriangleIndices.Add(4);
+            meshGeometry3D.TriangleIndices.Add(7);
+            meshGeometry3D.TriangleIndices.Add(6);
+            meshGeometry3D.TriangleIndices.Add(4);
+            meshGeometry3D.TriangleIndices.Add(5);
+            meshGeometry3D.TriangleIndices.Add(7);
+
+
+             meshGeometry3D.TriangleIndices.Add(0);
             meshGeometry3D.TriangleIndices.Add(3);
             meshGeometry3D.TriangleIndices.Add(2);
             meshGeometry3D.TriangleIndices.Add(0);
             meshGeometry3D.TriangleIndices.Add(1);
             meshGeometry3D.TriangleIndices.Add(3);
 
-            DiffuseMaterial diffuseMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Yellow));
+
+            meshGeometry3D.TriangleIndices.Add(4);
+            meshGeometry3D.TriangleIndices.Add(6);
+            meshGeometry3D.TriangleIndices.Add(7);
+            meshGeometry3D.TriangleIndices.Add(4);
+            meshGeometry3D.TriangleIndices.Add(7);
+            meshGeometry3D.TriangleIndices.Add(5);
+
+            DiffuseMaterial diffuseMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Black));
 
             GeometryModel3D geometryModel3D = new GeometryModel3D(meshGeometry3D, diffuseMaterial);
 
@@ -608,6 +635,68 @@ namespace pz3_Grafika
                 doubleAnimation.From = myAngleRotation.Angle;
                 doubleAnimation.To = myAngleRotation.Angle;
                 myAngleRotation.BeginAnimation(AxisAngleRotation3D.AngleProperty, doubleAnimation);
+            }
+        }
+
+       
+
+
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            var checkBox = sender as CheckBox;
+            if (checkBox.Content.ToString() == "Switchs")
+            {
+                foreach (var geoModel in SwitchGeometryModels)
+                {
+                    model3dGroup.Children.Remove(geoModel);
+                }
+
+            }
+            else if (checkBox.Content.ToString() == "Nodes")
+            {
+                foreach (var geoModel in NodeGeometryModels)
+                {
+                    model3dGroup.Children.Remove(geoModel);
+                }
+
+            }
+            else if (checkBox.Content.ToString() == "Substations")
+            {
+                foreach (var geoModel in SubstationGeometryModels)
+                {
+                    model3dGroup.Children.Remove(geoModel);
+                }
+
+            }
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            var checkBox = sender as CheckBox;
+          
+            if(checkBox.Content.ToString() == "Switchs")
+            {
+                foreach(var geoModel in SwitchGeometryModels)
+                {
+                    model3dGroup.Children.Add(geoModel);
+                }
+
+            }
+            else if (checkBox.Content.ToString() == "Nodes")
+            {
+                foreach (var geoModel in NodeGeometryModels)
+                {
+                    model3dGroup.Children.Add(geoModel);
+                }
+
+            }
+            else if (checkBox.Content.ToString() == "Substations")
+            {
+                foreach (var geoModel in SubstationGeometryModels)
+                {
+                    model3dGroup.Children.Add(geoModel);
+                }
+
             }
         }
     }
